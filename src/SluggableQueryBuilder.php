@@ -14,14 +14,21 @@ class SluggableQueryBuilder extends Builder
         }
                 
         if (is_array($id) || $id instanceof Arrayable) {
-            $this->query->whereIn($this->model->getSlugAttributeName(), array_map($id, function($id) {
+            $values = array_map($id, function($id) {
                 return $this->model->slugify($id);
-            }));
+            });
+
+            array_push($values, $id);
+
+            $this->query->whereIn($this->model->getSlugAttributeName(), array_unique($values));
 
             return $this;
         }
 
-        return $this->where($this->model->getSlugAttributeName(), '=', $this->model->slugify($id));
+        return $this->where(function($query) use ($id) {
+            $query->orWhere($this->model->getSlugAttributeName(), '=', $id);
+            $query->orWhere($this->model->getSlugAttributeName(), '=', $this->model->slugify($id));
+        });
     }
 
 }
