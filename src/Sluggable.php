@@ -148,18 +148,29 @@ trait Sluggable {
      */
     public function createSlug($value): string
     {
-        $slug = str_slug($value, $this->getSlugDelimiter());
+        $slug = $this->slugify($value);
 
         if($this->preventDuplicateSlugs()) {
             $totalDuplicates = 0;
 
             while(static::whereSlug($slug)->count()) {
-                $slug = str_slug(preg_replace('/-\d+$/', '', $slug) . ' ' . ($totalDuplicates += 1));
+                $slug = $this->slugify(preg_replace('/-\d+$/', '', $slug) . ' ' . ($totalDuplicates += 1));
             }
         }
 
         return $slug;
     }
+
+    /**
+     * Convert a string to a slug.
+     *
+     * @return string
+     */
+    public function slugify($value): string
+    {
+        return str_slug($value, $this->getSlugDelimiter());
+    }
+    
 
     /**
      * Create a new Eloquent query builder for the model.

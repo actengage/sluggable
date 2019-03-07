@@ -15,13 +15,13 @@ class SluggableQueryBuilder extends Builder
                 
         if (is_array($id) || $id instanceof Arrayable) {
             $this->query->whereIn($this->model->getSlugAttributeName(), array_map($id, function($id) {
-                return str_slug($id);
+                return $this->model->slugify($id);
             }));
 
             return $this;
         }
 
-        return $this->where($this->model->getSlugAttributeName(), '=', str_slug($id));
+        return $this->where($this->model->getSlugAttributeName(), '=', $this->model->slugify($id));
     }
 
 }
