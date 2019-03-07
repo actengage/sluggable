@@ -1,0 +1,43 @@
+{
+    "name": "actengage/sluggable",
+    "description": "A simple trait to ensure Laravel models have slugs.",
+    "keywords": ["slugs", "sluggable"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Justin Kimbrell",
+            "email": "jkimbrell@actengage.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.1",
+        "laravel/framework": "^5.5",
+        "fzaninotto/faker": "^1.8"
+    },
+    "require-dev": {
+        "orchestra/testbench": "~3.6",
+        "mockery/mockery": "^1.1",
+        "phpunit/phpunit": "^7.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Actengage\\Sluggable\\": "src/",
+            "Tests\\": "tests/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4" : {
+            "Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                
+            ],
+            "aliases": {
+
+            }
+        }
+    }
+}
