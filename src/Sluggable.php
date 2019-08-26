@@ -2,21 +2,10 @@
 
 namespace Actengage\Sluggable;
 
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 
 trait Sluggable {
-
-    /**
-     * Boot the trait.
-     *
-     * @return void
-     */
-    public static function bootSluggable()
-    {
-        static::saving(function(Model $model) {
-            $model->ensureSlugExists($model->getTitle());
-        });
-    }
 
     /**
      * Ensure this instance has a slug value.
@@ -107,7 +96,7 @@ trait Sluggable {
      */
     public function setTitle($value)
     {
-        $this->{$this->getTitleAttributeName()} = $value;
+        $this->{$this->getSlugQualifierAttributeName()} = $value;
     }
 
     /**
@@ -166,9 +155,9 @@ trait Sluggable {
      *
      * @return string
      */
-    public function slugify($value): string
+    public function slugify($value, $delimiter = null): string
     {
-        return str_slug($value, $this->getSlugDelimiter());
+        return Str::slug($value, $delimiter ?: $this->getSlugDelimiter());
     }
     
 
@@ -183,4 +172,15 @@ trait Sluggable {
         return new SluggableQueryBuilder($query);
     }
 
+    /**
+     * Boot the trait.
+     *
+     * @return void
+     */
+    public static function bootSluggable()
+    {
+        static::saving(function(Model $model) {
+            $model->ensureSlugExists($model->getTitle());
+        });
+    }
 }

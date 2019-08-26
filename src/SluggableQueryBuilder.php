@@ -3,20 +3,24 @@
 namespace Actengage\Sluggable;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Support\Arrayable;
 
 class SluggableQueryBuilder extends Builder
 {
-
     public function whereKey($id)
     {
         if(is_numeric($id)) {
             return parent::whereKey($id);
         }
-                
-        if (is_array($id) || $id instanceof Arrayable) {
-            $values = array_map($id, function($id) {
+        
+        if($id instanceof Arrayable) {
+            $id = $id->toArray();
+        }
+
+        if(is_array($id)) {
+            $values = array_map(function($id) {
                 return $this->model->slugify($id);
-            });
+            }, $id);
 
             array_push($values, $id);
 
