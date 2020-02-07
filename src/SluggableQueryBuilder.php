@@ -15,7 +15,7 @@ class SluggableQueryBuilder extends Builder
 
         $ids = collect($id instanceof Arrayable ? $id->toArray() : $id);
 
-        return $this->query->where(function($query) use ($ids) {
+        $this->query->where(function($query) use ($ids) {
             $slugs = $ids->map(function($id) {
                 return $this->model->slugify($id);
             });
@@ -23,6 +23,8 @@ class SluggableQueryBuilder extends Builder
             $query->orWhereIn($this->model->getKeyName(), $ids->unique());
             $query->orWhereIn($this->model->getSlugAttributeName(), $slugs->unique());
         });
+
+        return $this;
     }
 
 }
