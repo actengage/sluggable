@@ -7,24 +7,33 @@ use Illuminate\Contracts\Support\Arrayable;
 
 class SluggableQueryBuilder extends Builder
 {
-    public function whereKey($id)
+    public function whereKey($key)
     {
-        if(is_numeric($id)) {
-            return parent::whereKey($id);
+        if(is_numeric($key)) {
+            return parent::whereKey($key);
+        }
+        
+        if($key instanceof Arrayable) {
+            $key = $key->toArray();
         }
 
-        $ids = collect($id instanceof Arrayable ? $id->toArray() : $id);
-
-        $this->query->where(function($query) use ($ids) {
-            $slugs = $ids->map(function($id) {
-                return $this->model->slugify($id);
-            });
-
-            $query->orWhereIn($this->model->getKeyName(), $ids->unique());
-            $query->orWhereIn($this->model->getSlugAttributeName(), $slugs->unique());
+        collect($key)->each(function($key) {
+            $this->whereSlugOrKey($key);
         });
-
+        
         return $this;
+    }
+
+    public function whereSlugOrKey($key)
+    {
+        return $this->where(function($query) use ($key) {
+            if(is_numeric($key)) {
+                $query->orWhere($this->model->getQualifiedKeyName(), '=', $key);
+            }
+            else {
+                $query->orWhere($this->model->getSlugAttributeName(), '=', $this->model->slugify($key));
+            }
+        });
     }
 
 }
