@@ -1,4 +1,4 @@
-# Roles
+# Sluggable
 
 A simple package for managing "slugs" to Eloquent models. Sluggable is a trait
 for Eloquent models to ensure a slug exists for the model, and saved it in a

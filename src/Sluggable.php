@@ -26,7 +26,9 @@ trait Sluggable {
      */
     public function preventDuplicateSlugs(): bool
     {
-        return property_exists($this, 'preventDuplicateSlugs') ? $this->preventDuplicateSlugs : true;
+        return property_exists($this, 'preventDuplicateSlugs') 
+            ? $this->preventDuplicateSlugs
+            : true;
     }
 
     /**
@@ -160,18 +162,16 @@ trait Sluggable {
         return Str::slug($value, $delimiter ?: $this->getSlugDelimiter());
     }
     
-
     /**
-     * Create a new Eloquent query builder for the model.
+     * Find model by slug name.
      *
-     * @param  \Illuminate\Database\Query\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder|static
+     * @return void
      */
-    public function newEloquentBuilder($query)
+    public static function findBySlug(string $string)
     {
-        return new SluggableQueryBuilder($query);
+        return static::slug($string)->firstOrFail();
     }
-
+    
     /**
      * Boot the trait.
      *
