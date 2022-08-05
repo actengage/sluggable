@@ -76,14 +76,14 @@ trait Sluggable
     }
 
     /**
-     * Set the slug attribute using the title.
+     * Set the slug attribute.
      *
      * @param string|null $value
      * @return void
      */
-    public function setSlug(?string $title): void
+    public function setSlug(?string $value): void
     {
-        $this->{$this->getSlugAttributeName()} = $title;
+        $this->{$this->getSlugAttributeName()} = $value;
     }
 
     /**
@@ -91,9 +91,20 @@ trait Sluggable
      *
      * @return string|null
      */
-    public function title(): ?string
+    public function getTitle(): ?string
     {
         return $this->{$this->getSlugQualifierAttributeName()};
+    }
+
+    /**
+     * Set the title.
+     *
+     * @param string|null $value
+     * @return string|null
+     */
+    public function setTitle(?string $value): void
+    {
+        $this->{$this->getSlugQualifierAttributeName()} = $value;
     }
 
     /**
