@@ -7,23 +7,40 @@ use Tests\TestCase;
 
 class SluggableTest extends TestCase
 {
-    public function testCreateModel()
+    public function test_creating_sluggable()
     {
-        $page = Page::create([
-            'title' => $title = 'This is a test'
-        ]);
+        $page = Page::create(['title' => $title = 'This is a test']);
         
-        $this->assertTrue(kebab_case($title) === $page->slug);
+        $this->assertEquals('http://localhost/pages/this-is-a-test', $page->url);
+        $this->assertTrue(str($title)->kebab()->toString() === $page->slug);
+        $this->assertInstanceOf(Page::class, Page::findBySlug($page->slug));
     }
     
-    public function testFindBySlug()
+    public function test_prevent_duplicate_slug()
     {
-        $page = Page::create([
-            'title' => $title = 'This is a test'
-        ]);
-        
-        $this->assertInstanceOf(Page::class, Page::find($page->title));
-    }
-    
+        $class = new class extends Page {
+            protected $preventDuplicateSlugs = true;
+        };
 
+        $page = $class::create(['title' => 'test']);    
+        
+        $this->assertEquals('test', $page->slug);
+
+        $page = $class::create(['title' => 'test']);
+        
+        $this->assertEquals('test-1', $page->slug);
+
+        $page = $class::create(['title' => 'test']);
+        
+        $this->assertEquals('test-2', $page->slug);
+
+        $class = new class extends Page {
+            protected $preventDuplicateSlugs = false;
+        };
+
+        $page = $class::create(['title' => 'test']);   
+        
+        $this->assertEquals('test', $page->slug);
+    }
+    
 }

@@ -2,32 +2,36 @@
 
 namespace Actengage\Sluggable;
 
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 
-trait Sluggable {
-
+/**
+ * The sluggable class provides convenience methods to any Eloquent model that
+ * needs to have a URI slug associated with it.
+ */
+trait Sluggable
+{
     /**
      * Ensure this instance has a slug value.
      *
+     * @param string|null $title
      * @return void
      */
-    public function ensureSlugExists($default)
+    public function ensureSlugExists(?string $title): void
     {
         if(!$this->getSlug()) {
-            $this->setSlug($default);
+            $this->setSlug($title);
         }
     }
 
     /**
      * Should prevent duplicate slugs or not.
      *
-     * @return void
+     * @return bool
      */
     public function preventDuplicateSlugs(): bool
     {
         return property_exists($this, 'preventDuplicateSlugs') 
-            ? $this->preventDuplicateSlugs
+            ? (bool) $this->preventDuplicateSlugs
             : true;
     }
 
@@ -64,7 +68,7 @@ trait Sluggable {
     /**
      * Get the slug attribute.
      *
-     * @return mixed
+     * @return string|null
      */
     public function getSlug(): ?string
     {
@@ -72,37 +76,28 @@ trait Sluggable {
     }
 
     /**
-     * Get the slug attribute.
+     * Set the slug attribute using the title.
      *
+     * @param string|null $value
      * @return void
      */
-    public function setSlug($value)
+    public function setSlug(?string $title): void
     {
-        $this->{$this->getSlugAttributeName()} = $value;
+        $this->{$this->getSlugAttributeName()} = $title;
     }
 
     /**
-     * Get the title attribute.
+     * Get the title.
      *
-     * @return moxed
+     * @return string|null
      */
-    public function getTitle(): ?string
+    public function title(): ?string
     {
         return $this->{$this->getSlugQualifierAttributeName()};
     }
 
     /**
-     * Set the title attribute.
-     *
-     * @return void
-     */
-    public function setTitle($value)
-    {
-        $this->{$this->getSlugQualifierAttributeName()} = $value;
-    }
-
-    /**
-     * Get the url attribute.
+     * A getter for the url attribute.
      *
      * @return string
      */
@@ -114,32 +109,36 @@ trait Sluggable {
     /**
      * Scope a query to find a slug.
      *
+     * @param [type] $query
+     * @param string|null $slug
      * @return void
      */
-    public function scopeSlug($query, $value)
+    public function scopeSlug($query, ?string $slug): void
     {
-        $query->whereSlug($value);
+        $query->whereSlug($slug);
     }
 
     /**
      * Set the slug attribute.
      *
+     * @param String|null $title
      * @return void
      */
-    public function setSlugAttribute($value)
+    public function setSlugAttribute(?String $title): void
     {
-        $this->attributes[$this->getSlugAttributeName()] = $this->createSlug($value);
+        $this->attributes[$this->getSlugAttributeName()] = $this->createSlug($title);
     }
 
     /**
      * Create a slug from a give string. Checks for duplicates until a unique
      * slug is created.
      *
+     * @param string|null $title
      * @return string
      */
-    public function createSlug($value): string
+    public function createSlug(?string $title): string
     {
-        $slug = $this->slugify($value);
+        $slug = $this->slugify($title);
 
         if($this->preventDuplicateSlugs()) {
             $totalDuplicates = 0;
@@ -155,19 +154,21 @@ trait Sluggable {
     /**
      * Convert a string to a slug.
      *
+     * @param string|null $value
+     * @param string|null $delimiter
      * @return string
      */
-    public function slugify($value, $delimiter = null): string
+    public function slugify(?string $value, string $delimiter = null): string
     {
-        return Str::slug($value, $delimiter ?: $this->getSlugDelimiter());
+        return str($value)->slug($delimiter ?: $this->getSlugDelimiter());
     }
     
     /**
      * Find model by slug name.
      *
-     * @return void
+     * @return static
      */
-    public static function findBySlug(string $string)
+    public static function findBySlug(string $string): static
     {
         return static::slug($string)->firstOrFail();
     }
@@ -177,10 +178,10 @@ trait Sluggable {
      *
      * @return void
      */
-    public static function bootSluggable()
+    public static function bootSluggable(): void
     {
         static::saving(function(Model $model) {
-            $model->ensureSlugExists($model->getTitle());
+            $model->ensureSlugExists($model->title());
         });
     }
 }
