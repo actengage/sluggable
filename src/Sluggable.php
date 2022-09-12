@@ -11,15 +11,15 @@ use Illuminate\Database\Eloquent\Model;
 trait Sluggable
 {
     /**
-     * Ensure this instance has a slug value.
+     * Ensure this instance has a slug.
      *
-     * @param string|null $title
+     * @param string|null $value
      * @return void
      */
-    public function ensureSlugExists(?string $title): void
+    public function ensureSlugExists(?string $value): void
     {
         if(!$this->getSlug()) {
-            $this->setSlug($title);
+            $this->setSlug($value);
         }
     }
 
@@ -87,22 +87,22 @@ trait Sluggable
     }
 
     /**
-     * Get the title.
+     * Get the slug qualifier.
      *
      * @return string|null
      */
-    public function getTitle(): ?string
+    public function getSlugQualifier(): ?string
     {
         return $this->{$this->getSlugQualifierAttributeName()};
     }
 
     /**
-     * Set the title.
+     * Set the slug qualifier.
      *
      * @param string|null $value
      * @return string|null
      */
-    public function setTitle(?string $value): void
+    public function setSlugQualifier(?string $value): void
     {
         $this->{$this->getSlugQualifierAttributeName()} = $value;
     }
@@ -192,7 +192,7 @@ trait Sluggable
     public static function bootSluggable(): void
     {
         static::saving(function(Model $model) {
-            $model->ensureSlugExists($model->title());
+            $model->ensureSlugExists($model->getSlugQualifier());
         });
     }
 }
