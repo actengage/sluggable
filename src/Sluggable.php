@@ -154,12 +154,23 @@ trait Sluggable
         if($this->preventDuplicateSlugs()) {
             $totalDuplicates = 0;
 
-            while(static::whereSlug($slug)->count()) {
+            while($this->isSlugUnique($slug)) {
                 $slug = $this->slugify(preg_replace('/-\d+$/', '', $slug) . ' ' . ($totalDuplicates += 1));
             }
         }
 
         return $slug;
+    }
+
+    /**
+     * Check if a given slug is unique.
+     *
+     * @param string $slug
+     * @return boolean
+     */
+    public function isSlugUnique(string $slug): bool
+    {
+        return static::slug($slug)->exists();
     }
 
     /**
