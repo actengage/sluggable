@@ -108,16 +108,6 @@ trait Sluggable
     }
 
     /**
-     * A getter for the url attribute.
-     *
-     * @return string
-     */
-    public function getUrlAttribute(): string
-    {
-        return url($this->getTable().'/'.$this->getSlug());
-    }
-
-    /**
      * Scope a query to find a slug.
      *
      * @param [type] $query
