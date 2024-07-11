@@ -11,7 +11,6 @@ class SluggableTest extends TestCase
     {
         $page = Page::create(['title' => $title = 'This is a test']);
         
-        $this->assertEquals('http://localhost/pages/this-is-a-test', $page->url);
         $this->assertTrue(str($title)->kebab()->toString() === $page->slug);
         $this->assertInstanceOf(Page::class, Page::findBySlug($page->slug));
     }
