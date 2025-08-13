@@ -170,7 +170,7 @@ trait Sluggable
      * @param string|null $delimiter
      * @return string
      */
-    public function slugify(?string $value, string $delimiter = null): string
+    public function slugify(?string $value, ?string $delimiter = null): string
     {
         return str($value)->slug($delimiter ?: $this->getSlugDelimiter());
     }
