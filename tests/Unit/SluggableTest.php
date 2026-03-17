@@ -1,45 +1,42 @@
 <?php
 
-namespace Tests\Unit;
-
 use Tests\Page;
-use Tests\TestCase;
 
-class SluggableTest extends TestCase
-{
-    public function test_creating_sluggable()
+it('creates a slug from the title', function (): void {
+    $page = Page::create(['title' => $title = 'This is a test']);
+
+    expect($page->slug)->toBe(str($title)->kebab()->toString());
+    expect(Page::findBySlug((string) $page->slug))->toBeInstanceOf(Page::class);
+});
+
+it('sets the slug qualifier', function (): void {
+    $page = new Page;
+    $page->setSlugQualifier('New Title');
+
+    expect($page->title)->toBe('New Title');
+});
+
+it('prevents duplicate slugs', function (): void {
+    $page = Page::create(['title' => 'test']);
+    expect($page->slug)->toBe('test');
+
+    $page = Page::create(['title' => 'test']);
+    expect($page->slug)->toBe('test-1');
+
+    $page = Page::create(['title' => 'test']);
+    expect($page->slug)->toBe('test-2');
+});
+
+it('allows duplicate slugs when prevention is disabled', function (): void {
+    Page::create(['title' => 'test']);
+
+    $noDupes = new class extends Page
     {
-        $page = Page::create(['title' => $title = 'This is a test']);
-        
-        $this->assertTrue(str($title)->kebab()->toString() === $page->slug);
-        $this->assertInstanceOf(Page::class, Page::findBySlug($page->slug));
-    }
-    
-    public function test_prevent_duplicate_slug()
-    {
-        $class = new class extends Page {
-            protected $preventDuplicateSlugs = true;
-        };
+        /** @var bool */
+        protected $preventDuplicateSlugs = false;
+    };
 
-        $page = $class::create(['title' => 'test']);    
-        
-        $this->assertEquals('test', $page->slug);
+    $page = $noDupes::create(['title' => 'test']);
 
-        $page = $class::create(['title' => 'test']);
-        
-        $this->assertEquals('test-1', $page->slug);
-
-        $page = $class::create(['title' => 'test']);
-        
-        $this->assertEquals('test-2', $page->slug);
-
-        $class = new class extends Page {
-            protected $preventDuplicateSlugs = false;
-        };
-
-        $page = $class::create(['title' => 'test']);   
-        
-        $this->assertEquals('test', $page->slug);
-    }
-    
-}
+    expect($page->slug)->toBe('test');
+});

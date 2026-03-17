@@ -2,43 +2,39 @@
 
 namespace Actengage\Sluggable;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * The sluggable class provides convenience methods to any Eloquent model that
  * needs to have a URI slug associated with it.
+ *
+ * @mixin Model
  */
 trait Sluggable
 {
     /**
      * Ensure this instance has a slug.
-     *
-     * @param string|null $value
-     * @return void
      */
     public function ensureSlugExists(?string $value): void
     {
-        if(!$this->getSlug()) {
+        if (! $this->getSlug()) {
             $this->setSlug($value);
         }
     }
 
     /**
      * Should prevent duplicate slugs or not.
-     *
-     * @return bool
      */
     public function preventDuplicateSlugs(): bool
     {
-        return property_exists($this, 'preventDuplicateSlugs') 
+        return property_exists($this, 'preventDuplicateSlugs')
             ? (bool) $this->preventDuplicateSlugs
             : true;
     }
 
     /**
      * Get the slug delimiting string.
-     *
-     * @return string
      */
     public function getSlugDelimiter(): string
     {
@@ -47,8 +43,6 @@ trait Sluggable
 
     /**
      * Get the slug attribute name.
-     *
-     * @return string
      */
     public function getSlugAttributeName(): string
     {
@@ -57,8 +51,6 @@ trait Sluggable
 
     /**
      * Get the name of the attribute used to qualify a slug.
-     *
-     * @return string
      */
     public function getSlugQualifierAttributeName(): string
     {
@@ -67,19 +59,16 @@ trait Sluggable
 
     /**
      * Get the slug attribute.
-     *
-     * @return string|null
      */
     public function getSlug(): ?string
     {
-        return $this->{$this->getSlugAttributeName()};
+        $value = $this->getAttribute($this->getSlugAttributeName());
+
+        return is_string($value) ? $value : null;
     }
 
     /**
      * Set the slug attribute.
-     *
-     * @param string|null $value
-     * @return void
      */
     public function setSlug(?string $value): void
     {
@@ -88,19 +77,16 @@ trait Sluggable
 
     /**
      * Get the slug qualifier.
-     *
-     * @return string|null
      */
     public function getSlugQualifier(): ?string
     {
-        return $this->{$this->getSlugQualifierAttributeName()};
+        $value = $this->getAttribute($this->getSlugQualifierAttributeName());
+
+        return is_string($value) ? $value : null;
     }
 
     /**
      * Set the slug qualifier.
-     *
-     * @param string|null $value
-     * @return string|null
      */
     public function setSlugQualifier(?string $value): void
     {
@@ -110,22 +96,17 @@ trait Sluggable
     /**
      * Scope a query to find a slug.
      *
-     * @param [type] $query
-     * @param string|null $slug
-     * @return void
+     * @param  Builder<static>  $query
      */
-    public function scopeSlug($query, ?string $slug): void
+    public function scopeSlug(Builder $query, ?string $slug): void
     {
-        $query->whereSlug($slug);
+        $query->where($this->getSlugAttributeName(), $slug);
     }
 
     /**
      * Set the slug attribute.
-     *
-     * @param String|null $title
-     * @return void
      */
-    public function setSlugAttribute(?String $title): void
+    public function setSlugAttribute(?string $title): void
     {
         $this->attributes[$this->getSlugAttributeName()] = $this->createSlug($title);
     }
@@ -133,19 +114,16 @@ trait Sluggable
     /**
      * Create a slug from a give string. Checks for duplicates until a unique
      * slug is created.
-     *
-     * @param string|null $title
-     * @return string
      */
     public function createSlug(?string $title): string
     {
         $slug = $this->slugify($title);
 
-        if($this->preventDuplicateSlugs()) {
+        if ($this->preventDuplicateSlugs()) {
             $totalDuplicates = 0;
 
-            while($this->isSlugUnique($slug)) {
-                $slug = $this->slugify(preg_replace('/-\d+$/', '', $slug) . ' ' . ($totalDuplicates += 1));
+            while ($this->isSlugUnique($slug)) {
+                $slug = $this->slugify(preg_replace('/-\d+$/', '', (string) $slug).' '.($totalDuplicates += 1));
             }
         }
 
@@ -154,9 +132,6 @@ trait Sluggable
 
     /**
      * Check if a given slug is unique.
-     *
-     * @param string $slug
-     * @return boolean
      */
     public function isSlugUnique(string $slug): bool
     {
@@ -165,34 +140,27 @@ trait Sluggable
 
     /**
      * Convert a string to a slug.
-     *
-     * @param string|null $value
-     * @param string|null $delimiter
-     * @return string
      */
     public function slugify(?string $value, ?string $delimiter = null): string
     {
-        return str($value)->slug($delimiter ?: $this->getSlugDelimiter());
+        return (string) str($value)->slug($delimiter ?: $this->getSlugDelimiter());
     }
-    
+
     /**
      * Find model by slug name.
-     *
-     * @return static
      */
     public static function findBySlug(string $string): static
     {
+        /** @var static */
         return static::slug($string)->firstOrFail();
     }
-    
+
     /**
      * Boot the trait.
-     *
-     * @return void
      */
     public static function bootSluggable(): void
     {
-        static::saving(function(Model $model) {
+        static::saving(function (self $model): void {
             $model->ensureSlugExists($model->getSlugQualifier());
         });
     }
