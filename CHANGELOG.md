@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.0.1
+
+### Patch Changes
+
+- [#10](https://github.com/actengage/sluggable/pull/10) [`3a4271c`](https://github.com/actengage/sluggable/commit/3a4271c9404678bdbd0024a7027cb8b79c8aff5b) Thanks [@actengage](https://github.com/actengage)! - Fix method name conflict with Laravel 13's `Model::resolveClassAttribute()` by renaming to `resolveSluggableAttribute()`
+
 ## 7.0.0
 
 ### Major Changes
