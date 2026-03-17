@@ -22,7 +22,7 @@ trait Sluggable
      * @param  class-string<T>  $attributeClass
      * @return T|null
      */
-    protected function resolveClassAttribute(string $attributeClass): ?object
+    protected function resolveSluggableAttribute(string $attributeClass): ?object
     {
         $reflection = new ReflectionClass($this);
         $attributes = $reflection->getAttributes($attributeClass);
@@ -49,7 +49,7 @@ trait Sluggable
      */
     public function preventDuplicateSlugs(): bool
     {
-        $attribute = $this->resolveClassAttribute(PreventDuplicateSlugs::class);
+        $attribute = $this->resolveSluggableAttribute(PreventDuplicateSlugs::class);
 
         if ($attribute !== null) {
             return $attribute->enabled;
@@ -65,7 +65,7 @@ trait Sluggable
      */
     public function getSlugDelimiter(): string
     {
-        $attribute = $this->resolveClassAttribute(SlugDelimiter::class);
+        $attribute = $this->resolveSluggableAttribute(SlugDelimiter::class);
 
         return $attribute !== null ? $attribute->delimiter : '-';
     }
@@ -75,7 +75,7 @@ trait Sluggable
      */
     public function getSlugAttributeName(): string
     {
-        $attribute = $this->resolveClassAttribute(SlugAttribute::class);
+        $attribute = $this->resolveSluggableAttribute(SlugAttribute::class);
 
         return $attribute !== null ? $attribute->name : 'slug';
     }
@@ -85,7 +85,7 @@ trait Sluggable
      */
     public function getSlugQualifierAttributeName(): string
     {
-        $attribute = $this->resolveClassAttribute(Slug::class);
+        $attribute = $this->resolveSluggableAttribute(Slug::class);
 
         return $attribute !== null ? $attribute->qualifier : 'title';
     }
