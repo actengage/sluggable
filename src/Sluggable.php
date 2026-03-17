@@ -4,6 +4,7 @@ namespace Actengage\Sluggable;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use ReflectionClass;
 
 /**
  * The sluggable class provides convenience methods to any Eloquent model that
@@ -13,6 +14,26 @@ use Illuminate\Database\Eloquent\Model;
  */
 trait Sluggable
 {
+    /**
+     * Resolve a PHP attribute from the model class.
+     *
+     * @template T of object
+     *
+     * @param  class-string<T>  $attributeClass
+     * @return T|null
+     */
+    protected function resolveClassAttribute(string $attributeClass): ?object
+    {
+        $reflection = new ReflectionClass($this);
+        $attributes = $reflection->getAttributes($attributeClass);
+
+        if ($attributes === []) {
+            return null;
+        }
+
+        return $attributes[0]->newInstance();
+    }
+
     /**
      * Ensure this instance has a slug.
      */
@@ -28,6 +49,12 @@ trait Sluggable
      */
     public function preventDuplicateSlugs(): bool
     {
+        $attribute = $this->resolveClassAttribute(PreventDuplicateSlugs::class);
+
+        if ($attribute !== null) {
+            return $attribute->enabled;
+        }
+
         return property_exists($this, 'preventDuplicateSlugs')
             ? (bool) $this->preventDuplicateSlugs
             : true;
@@ -38,7 +65,9 @@ trait Sluggable
      */
     public function getSlugDelimiter(): string
     {
-        return '-';
+        $attribute = $this->resolveClassAttribute(SlugDelimiter::class);
+
+        return $attribute !== null ? $attribute->delimiter : '-';
     }
 
     /**
@@ -46,7 +75,9 @@ trait Sluggable
      */
     public function getSlugAttributeName(): string
     {
-        return 'slug';
+        $attribute = $this->resolveClassAttribute(SlugAttribute::class);
+
+        return $attribute !== null ? $attribute->name : 'slug';
     }
 
     /**
@@ -54,7 +85,9 @@ trait Sluggable
      */
     public function getSlugQualifierAttributeName(): string
     {
-        return 'title';
+        $attribute = $this->resolveClassAttribute(Slug::class);
+
+        return $attribute !== null ? $attribute->qualifier : 'title';
     }
 
     /**
