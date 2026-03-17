@@ -32,22 +32,33 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Create Release Pull Request or Tag
+      - name: Create Release Pull Request
         id: changesets
         uses: changesets/action@v1
         with:
           title: "Version Packages"
           commit: "chore: version packages"
           version: pnpm changeset version
-          publish: pnpm changeset tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create GitHub Release
-        if: steps.changesets.outputs.published == 'true'
+      - name: Check if Version Packages PR was merged
+        id: check
         run: |
-          for tag in $(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[].version'); do
-            gh release create "v${tag}" --generate-notes
-          done
+          if [ "${{ steps.changesets.outputs.hasChangesets }}" = "false" ]; then
+            VERSION=$(node -p "require('./package.json').version")
+            if ! git ls-remote --tags origin "refs/tags/v${VERSION}" | grep -q .; then
+              echo "should_release=true" >> "$GITHUB_OUTPUT"
+              echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Create git tag and GitHub Release
+        if: steps.check.outputs.should_release == 'true'
+        run: |
+          VERSION="${{ steps.check.outputs.version }}"
+          git tag "v${VERSION}"
+          git push origin "v${VERSION}"
+          gh release create "v${VERSION}" --generate-notes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
