@@ -147,3 +147,17 @@ class Page extends Model
     protected $preventDuplicateSlugs = false;
 }
 ```
+
+### Publishing a New Release
+
+This package uses [changesets](https://github.com/changesets/changesets) for automated versioning and releases.
+
+1. Create a branch and make your changes
+2. Add a changeset describing the change:
+   ```
+   pnpm changeset
+   ```
+   Select the bump level (patch, minor, or major) and write a summary. See the [changeset skill](.claude/skills/changeset.md) for semver rules specific to this package.
+3. Open a PR — CI runs Pint, PHPStan, Rector, and Pest
+4. Merge the PR — the release workflow creates a "Version Packages" PR that bumps the version in `package.json` and updates `CHANGELOG.md`
+5. Review and merge the "Version Packages" PR — a git tag and GitHub Release are created automatically
